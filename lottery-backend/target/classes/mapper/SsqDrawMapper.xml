@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lottery.mapper.SsqDrawMapper">
+
+    <resultMap id="BaseResultMap" type="com.lottery.entity.SsqDraw">
+        <id     column="id"         property="id"/>
+        <result column="issue"      property="issue"/>
+        <result column="red_1"      property="red1"/>
+        <result column="red_2"      property="red2"/>
+        <result column="red_3"      property="red3"/>
+        <result column="red_4"      property="red4"/>
+        <result column="red_5"      property="red5"/>
+        <result column="red_6"      property="red6"/>
+        <result column="blue"       property="blue"/>
+        <result column="draw_date"  property="drawDate"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, issue, red_1, red_2, red_3, red_4, red_5, red_6, blue, draw_date, created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.lottery.entity.SsqDraw" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ssq_draw (issue, red_1, red_2, red_3, red_4, red_5, red_6, blue, draw_date)
+        VALUES (#{issue}, #{red1}, #{red2}, #{red3}, #{red4}, #{red5}, #{red6}, #{blue}, #{drawDate})
+    </insert>
+
+    <insert id="insertBatch" parameterType="map">
+        INSERT INTO ssq_draw (issue, red_1, red_2, red_3, red_4, red_5, red_6, blue, draw_date)
+        VALUES
+        <foreach collection="list" item="d" separator=",">
+            (#{d.issue}, #{d.red1}, #{d.red2}, #{d.red3}, #{d.red4}, #{d.red5}, #{d.red6}, #{d.blue}, #{d.drawDate})
+        </foreach>
+    </insert>
+
+    <update id="updateById" parameterType="com.lottery.entity.SsqDraw">
+        UPDATE ssq_draw
+        <set>
+            <if test="issue != null">issue = #{issue},</if>
+            <if test="red1 != null">red_1 = #{red1},</if>
+            <if test="red2 != null">red_2 = #{red2},</if>
+            <if test="red3 != null">red_3 = #{red3},</if>
+            <if test="red4 != null">red_4 = #{red4},</if>
+            <if test="red5 != null">red_5 = #{red5},</if>
+            <if test="red6 != null">red_6 = #{red6},</if>
+            <if test="blue != null">blue = #{blue},</if>
+            <if test="drawDate != null">draw_date = #{drawDate}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM ssq_draw WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM ssq_draw WHERE id = #{id}
+    </select>
+
+    <select id="selectByIssue" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM ssq_draw WHERE issue = #{issue} LIMIT 1
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ssq_draw
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (issue LIKE CONCAT('%', #{keyword}, '%')
+                     OR CONCAT(red_1,',',red_2,',',red_3,',',red_4,',',red_5,',',red_6) LIKE CONCAT('%', #{keyword}, '%')
+                     OR blue = #{keyword})
+            </if>
+            <if test="startDate != null">AND draw_date <![CDATA[ >= ]]> #{startDate}</if>
+            <if test="endDate != null">AND draw_date <![CDATA[ <= ]]> #{endDate}</if>
+        </where>
+        ORDER BY draw_date DESC, issue DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(1) FROM ssq_draw
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (issue LIKE CONCAT('%', #{keyword}, '%')
+                     OR CONCAT(red_1,',',red_2,',',red_3,',',red_4,',',red_5,',',red_6) LIKE CONCAT('%', #{keyword}, '%')
+                     OR blue = #{keyword})
+            </if>
+            <if test="startDate != null">AND draw_date <![CDATA[ >= ]]> #{startDate}</if>
+            <if test="endDate != null">AND draw_date <![CDATA[ <= ]]> #{endDate}</if>
+        </where>
+    </select>
+
+    <select id="selectLatest" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ssq_draw ORDER BY draw_date DESC, issue DESC LIMIT 1
+    </select>
+
+    <select id="selectFirstAfterDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ssq_draw
+        WHERE draw_date <![CDATA[ >= ]]> #{date}
+        ORDER BY draw_date ASC, issue ASC LIMIT 1
+    </select>
+
+    <select id="countByIssue" resultType="int">
+        SELECT COUNT(1) FROM ssq_draw WHERE issue = #{issue}
+    </select>
+</mapper>

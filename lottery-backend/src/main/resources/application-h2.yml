@@ -1,0 +1,37 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: lottery-backend
+  # H2 内存数据库 (MySQL 兼容模式) — 无需安装 MySQL
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:lottery_db;MODE=MySQL;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema-h2.sql
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.lottery.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.lottery: debug
+    org.springframework.web: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+lottery:
+  import:
+    history-json-path: classpath:data/ssq_history.json
+    auto-import: true

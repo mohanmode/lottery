@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lottery.mapper.SsqPrizeRuleMapper">
+
+    <resultMap id="BaseResultMap" type="com.lottery.entity.SsqPrizeRule">
+        <id     column="id"              property="id"/>
+        <result column="level_code"      property="levelCode"/>
+        <result column="level_name"      property="levelName"/>
+        <result column="red_hit_min"     property="redHitMin"/>
+        <result column="red_hit_max"     property="redHitMax"/>
+        <result column="blue_hit"        property="blueHit"/>
+        <result column="blue_match_any"  property="blueMatchAny"/>
+        <result column="prize_amount"    property="prizeAmount"/>
+        <result column="prize_desc"      property="prizeDesc"/>
+        <result column="sort_no"         property="sortNo"/>
+        <result column="is_active"       property="isActive"/>
+    </resultMap>
+
+    <select id="selectAllActive" resultMap="BaseResultMap">
+        SELECT * FROM ssq_prize_rule WHERE is_active = 1 ORDER BY sort_no ASC
+    </select>
+
+    <select id="matchByHit" resultMap="BaseResultMap">
+        SELECT * FROM ssq_prize_rule
+        WHERE is_active = 1
+          AND red_hit_min <![CDATA[ <= ]]> #{redHit}
+          AND red_hit_max <![CDATA[ >= ]]> #{redHit}
+          AND (blue_match_any = 1 OR blue_hit = #{blueHit})
+        ORDER BY sort_no ASC
+    </select>
+</mapper>
