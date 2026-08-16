@@ -1,0 +1,54 @@
+html, body, #app { margin: 0; padding: 0; height: 100%; }
+* { box-sizing: border-box; }
+body {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+::-webkit-scrollbar-thumb { background: rgba(255,107,53,0.4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,107,53,0.7); }
+
+/* 玻璃卡片 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* 号码球样式 */
+.ball {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  font-weight: bold; font-size: 14px;
+  border: 2px solid transparent;
+  user-select: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.ball.red { background: linear-gradient(145deg, #ff6b35, #e63946); color: #fff; border-color: #ff6b35; }
+.ball.blue { background: linear-gradient(145deg, #4a90e2, #2563eb); color: #fff; border-color: #4a90e2; }
+.ball.green { background: linear-gradient(145deg, #10b981, #059669); color: #fff; border-color: #10b981; }
+.ball.gold { background: linear-gradient(145deg, #ffd666, #f59e0b); color: #1a1a2e; border-color: #ffd666; }
+.ball.gray { background: rgba(255,255,255,0.1); color: #aaa; border-color: rgba(255,255,255,0.2); }
+.ball.selected { transform: scale(1.12); box-shadow: 0 0 18px currentColor; }
+.ball:hover { transform: translateY(-2px); }
+.ball-sm { width: 28px; height: 28px; font-size: 12px; }
+.ball-lg { width: 54px; height: 54px; font-size: 20px; }
+
+/* 覆盖 Element Plus 暗色适配 */
+:deep(.el-input__wrapper), :deep(.el-textarea__inner), :deep(.el-select__wrapper) {
+  background: rgba(255,255,255,0.05) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset !important;
+  .el-input__inner, .el-select__placeholder { color: #fff !important; }
+}
+:deep(.el-dialog), :deep(.el-drawer) {
+  --el-bg-color: #232b48 !important;
+  --el-text-color-primary: #fff !important;
+  --el-text-color-regular: rgba(255,255,255,0.85) !important;
+}
+:deep(.el-pager li) { background: rgba(255,255,255,0.05); color: #fff; }
+:deep(.el-pager li.is-active) { background: #ff6b35; }
