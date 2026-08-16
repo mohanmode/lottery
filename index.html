@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩票选号器 - 快乐8 & 双色球螺旋选号</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .tab {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .tab.active {
+            background: linear-gradient(45deg, #ff6b35, #f7c59f);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        .tab:hover {
+            transform: translateY(-2px);
+        }
+        .panel {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .panel.active {
+            display: block;
+        }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .number-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            justify-self: center;
+        }
+        .number-btn:hover {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.3);
+        }
+        .number-btn.selected {
+            background: linear-gradient(45deg, #ff6b35, #f7c59f);
+            border-color: #ff6b35;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        .number-btn.dan {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            border-color: #00ff88;
+            color: #1a1a2e;
+        }
+        .number-btn.tuo {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            border-color: #00aaff;
+            color: #1a1a2e;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b35, #f7c59f);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .selected-numbers {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .selected-numbers h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .numbers-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .num-tag {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .num-tag.normal {
+            background: linear-gradient(45deg, #ff6b35, #f7c59f);
+            color: #1a1a2e;
+        }
+        .num-tag.dan {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #1a1a2e;
+        }
+        .num-tag.tuo {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            color: #1a1a2e;
+        }
+        .result-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .result-panel h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .prize-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .prize-table th, .prize-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prize-table th {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+            font-weight: bold;
+        }
+        .prize-table td {
+            color: #fff;
+        }
+        .prize-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .total-cost {
+            text-align: right;
+            margin-top: 15px;
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .input-group label {
+            color: #fff;
+            font-size: 16px;
+        }
+        .input-group input {
+            width: 80px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+        .mode-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .split-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        /* 双色球螺旋图 */
+        .spiral-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            aspect-ratio: 1 / 1;
+        }
+        .spiral-svg {
+            width: 100%;
+            height: 100%;
+        }
+        .spiral-ball {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .spiral-ball:hover {
+            filter: brightness(1.2) drop-shadow(0 0 8px rgba(255,255,255,0.6));
+            transform-origin: center;
+        }
+        .spiral-ball text {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            font-weight: bold;
+            pointer-events: none;
+            user-select: none;
+        }
+        .ball-section {
+            margin-bottom: 30px;
+        }
+        .ball-section h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .ball-section h3 .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .ball-section h3 .dot.red {
+            background: linear-gradient(45deg, #ff3b3b, #e60000);
+            box-shadow: 0 0 10px rgba(255, 59, 59, 0.6);
+        }
+        .ball-section h3 .dot.blue {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+        }
+        .count-tag {
+            font-size: 14px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-weight: normal;
+        }
+        .count-tag.ok {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        .ssq-selected {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .ssq-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        .ssq-row-label {
+            min-width: 90px;
+            color: rgba(255,255,255,0.8);
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .ssq-ball {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 17px;
+            font-weight: bold;
+            position: relative;
+        }
+        .ssq-ball.red {
+            background: linear-gradient(135deg, #ff5c5c 0%, #e60000 100%);
+            box-shadow: 0 4px 12px rgba(230, 0, 0, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3);
+        }
+        .ssq-ball.blue {
+            background: linear-gradient(135deg, #5c9eff 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3);
+        }
+        .spiral-line {
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 4 6;
+        }
+        .fushi-info-box {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        .fushi-info-box p {
+            color: #ffd700;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        @media (max-width: 768px) {
+            .number-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            .number-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+            .split-panel {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 彩票选号器 - 快乐8 &amp; 双色球</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-panel="random">随机选号</button>
+            <button class="tab" data-panel="dantuo">胆拖选号</button>
+            <button class="tab" data-panel="fushi">复试选号</button>
+            <button class="tab" data-panel="ssq">双色球螺旋</button>
+        </div>
+
+        <!-- 随机选号 -->
+        <div class="panel active" id="random">
+            <div class="mode-info">
+                <strong>随机选号：</strong>自动随机生成1-10个号码，您可以手动调整选择。
+            </div>
+            <div class="input-group">
+                <label>选择号码数量：</label>
+                <input type="number" id="randomCount" min="1" max="10" value="10">
+            </div>
+            <div class="number-grid" id="randomGrid"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="generateRandom()">随机生成</button>
+                <button class="btn btn-secondary" onclick="clearRandom()">清空选择</button>
+            </div>
+            <div class="selected-numbers">
+                <h3>已选号码：</h3>
+                <div class="numbers-display" id="randomSelected"></div>
+            </div>
+            <div class="result-panel">
+                <h3>中奖可能性分析</h3>
+                <table class="prize-table">
+                    <thead>
+                        <tr>
+                            <th>中奖情况</th>
+                            <th>命中号码数</th>
+                            <th>概率估算</th>
+                        </tr>
+                    </thead>
+                    <tbody id="randomResult"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 胆拖选号 -->
+        <div class="panel" id="dantuo">
+            <div class="mode-info">
+                <strong>胆拖选号：</strong>胆码是您认为必出的号码，拖码是辅助号码。胆码+拖码组合成投注号码。
+            </div>
+            <div class="split-panel">
+                <div>
+                    <h3 style="color: #00ff88; margin-bottom: 15px;">胆码（必选号码）</h3>
+                    <div class="number-grid" id="danGrid"></div>
+                    <div class="controls" style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="clearDan()">清空胆码</button>
+                    </div>
+                    <div class="selected-numbers">
+                        <h3>已选胆码：</h3>
+                        <div class="numbers-display" id="danSelected"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: #00aaff; margin-bottom: 15px;">拖码（辅助号码）</h3>
+                    <div class="number-grid" id="tuoGrid"></div>
+                    <div class="controls" style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="clearTuo()">清空拖码</button>
+                    </div>
+                    <div class="selected-numbers">
+                        <h3>已选拖码：</h3>
+                        <div class="numbers-display" id="tuoSelected"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-panel">
+                <h3>胆拖组合分析</h3>
+                <div class="total-cost" id="dantuoCost"></div>
+                <table class="prize-table">
+                    <thead>
+                        <tr>
+                            <th>中奖等级</th>
+                            <th>条件</th>
+                            <th>注数</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dantuoResult"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 复试选号 -->
+        <div class="panel" id="fushi">
+            <div class="mode-info">
+                <strong>复试选号：</strong>选择多于10个号码，系统自动组合成多注10码投注，覆盖更多可能性。
+            </div>
+            <div class="number-grid" id="fushiGrid"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="generateFushiRandom()">随机生成</button>
+                <button class="btn btn-secondary" onclick="clearFushi()">清空选择</button>
+            </div>
+            <div class="selected-numbers">
+                <h3>已选号码：</h3>
+                <div class="numbers-display" id="fushiSelected"></div>
+            </div>
+            <div class="result-panel">
+                <h3>复试投注分析</h3>
+                <div class="total-cost" id="fushiCost"></div>
+                <table class="prize-table">
+                    <thead>
+                        <tr>
+                            <th>中奖等级</th>
+                            <th>命中号码数</th>
+                            <th>注数估算</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fushiResult"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 双色球螺旋选号 -->
+        <div class="panel" id="ssq">
+            <div class="mode-info">
+                <strong>双色球螺旋选号：</strong>号码按螺旋形排列，便于发现号码分布规律。<br>
+                规则：红球选6个（1-33），蓝球选1个（1-16）。可多选进行复式投注。
+            </div>
+            <div class="fushi-info-box" id="ssqFushiInfo" style="display:none;"></div>
+
+            <div class="ball-section">
+                <h3><span class="dot red"></span>红球区（1-33）
+                    <span class="count-tag" id="ssqRedCount">已选 0 / 6</span>
+                </h3>
+                <div class="spiral-container">
+                    <svg class="spiral-svg" id="ssqRedSpiral" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+            </div>
+
+            <div class="ball-section">
+                <h3><span class="dot blue"></span>蓝球区（1-16）
+                    <span class="count-tag" id="ssqBlueCount">已选 0 / 1</span>
+                </h3>
+                <div class="spiral-container" style="max-width: 480px;">
+                    <svg class="spiral-svg" id="ssqBlueSpiral" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="ssqRandomSelect()">机选1注</button>
+                <button class="btn btn-secondary" onclick="ssqRandomFushi()">机选复式</button>
+                <button class="btn btn-secondary" onclick="ssqClear()">清空</button>
+            </div>
+
+            <div class="selected-numbers">
+                <h3>当前选择号码：</h3>
+                <div class="ssq-selected">
+                    <div class="ssq-row">
+                        <div class="ssq-row-label">红球：</div>
+                        <div class="numbers-display" id="ssqRedSelected"></div>
+                    </div>
+                    <div class="ssq-row">
+                        <div class="ssq-row-label">蓝球：</div>
+                        <div class="numbers-display" id="ssqBlueSelected"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-panel">
+                <h3>投注分析 &amp; 中奖情况</h3>
+                <div class="total-cost" id="ssqCost"></div>
+                <table class="prize-table">
+                    <thead>
+                        <tr>
+                            <th>奖级</th>
+                            <th>中奖条件（红+蓝）</th>
+                            <th>单注奖金</th>
+                            <th>可能中出注数</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ssqResult"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRIZES = [
+            { level: '一等奖', match: 10, prize: '最高500万' },
+            { level: '二等奖', match: 9, prize: '固定奖' },
+            { level: '三等奖', match: 8, prize: '固定奖' },
+            { level: '四等奖', match: 7, prize: '固定奖' },
+            { level: '五等奖', match: 6, prize: '固定奖' },
+            { level: '六等奖', match: 5, prize: '固定奖' },
+            { level: '七等奖', match: 4, prize: '固定奖' },
+            { level: '八等奖', match: 3, prize: '固定奖' }
+        ];
+
+        function createNumberGrid(containerId, clickHandler, selected = [], extraClass = '') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (let i = 1; i <= 80; i++) {
+                const btn = document.createElement('button');
+                btn.className = `number-btn${selected.includes(i) ? ' selected ' + extraClass : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => clickHandler(i, containerId);
+                container.appendChild(btn);
+            }
+        }
+
+        function updateSelectedDisplay(selected, displayId, className) {
+            const display = document.getElementById(displayId);
+            display.innerHTML = '';
+            selected.sort((a, b) => a - b);
+            selected.forEach(num => {
+                const tag = document.createElement('div');
+                tag.className = `num-tag ${className}`;
+                tag.textContent = num;
+                display.appendChild(tag);
+            });
+        }
+
+        function combination(n, k) {
+            if (k > n || k < 0) return 0;
+            if (k === 0 || k === n) return 1;
+            k = Math.min(k, n - k);
+            let result = 1;
+            for (let i = 0; i < k; i++) {
+                result = result * (n - i) / (i + 1);
+            }
+            return Math.round(result);
+        }
+
+        // 随机选号
+        let randomSelected = [];
+        
+        function initRandom() {
+            createNumberGrid('randomGrid', toggleRandom);
+        }
+
+        function toggleRandom(num) {
+            const idx = randomSelected.indexOf(num);
+            if (idx > -1) {
+                randomSelected.splice(idx, 1);
+            } else if (randomSelected.length < 10) {
+                randomSelected.push(num);
+            }
+            updateRandomDisplay();
+        }
+
+        function updateRandomDisplay() {
+            createNumberGrid('randomGrid', toggleRandom, randomSelected);
+            updateSelectedDisplay(randomSelected, 'randomSelected', 'normal');
+            calculateRandomProbability();
+        }
+
+        function generateRandom() {
+            const count = parseInt(document.getElementById('randomCount').value) || 10;
+            randomSelected = [];
+            while (randomSelected.length < count) {
+                const num = Math.floor(Math.random() * 80) + 1;
+                if (!randomSelected.includes(num)) {
+                    randomSelected.push(num);
+                }
+            }
+            updateRandomDisplay();
+        }
+
+        function clearRandom() {
+            randomSelected = [];
+            updateRandomDisplay();
+        }
+
+        function calculateRandomProbability() {
+            const n = randomSelected.length;
+            const result = document.getElementById('randomResult');
+            result.innerHTML = '';
+            
+            if (n === 0) {
+                result.innerHTML = '<tr><td colspan="3" style="color: #ff6b35;">请先选择号码</td></tr>';
+                return;
+            }
+
+            PRIZES.forEach(prize => {
+                const k = prize.match;
+                if (k <= n) {
+                    const ways = combination(n, k) * combination(80 - n, 20 - k);
+                    const total = combination(80, 20);
+                    const prob = (ways / total * 100).toFixed(10);
+                    result.innerHTML += `
+                        <tr>
+                            <td>${prize.level}</td>
+                            <td>命中${k}个号码</td>
+                            <td>约1/${Math.round(total / ways)}</td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        // 胆拖选号
+        let danSelected = [];
+        let tuoSelected = [];
+
+        function initDanTuo() {
+            createNumberGrid('danGrid', toggleDan);
+            createNumberGrid('tuoGrid', toggleTuo);
+        }
+
+        function toggleDan(num) {
+            const idx = danSelected.indexOf(num);
+            if (idx > -1) {
+                danSelected.splice(idx, 1);
+                tuoSelected = tuoSelected.filter(n => n !== num);
+            } else if (danSelected.length < 10) {
+                danSelected.push(num);
+                tuoSelected = tuoSelected.filter(n => n !== num);
+            }
+            updateDanTuoDisplay();
+        }
+
+        function toggleTuo(num) {
+            const idx = tuoSelected.indexOf(num);
+            if (idx > -1) {
+                tuoSelected.splice(idx, 1);
+            } else if (danSelected.length + tuoSelected.length < 20) {
+                tuoSelected.push(num);
+                danSelected = danSelected.filter(n => n !== num);
+            }
+            updateDanTuoDisplay();
+        }
+
+        function updateDanTuoDisplay() {
+            createNumberGrid('danGrid', toggleDan, danSelected, 'dan');
+            createNumberGrid('tuoGrid', toggleTuo, tuoSelected, 'tuo');
+            updateSelectedDisplay(danSelected, 'danSelected', 'dan');
+            updateSelectedDisplay(tuoSelected, 'tuoSelected', 'tuo');
+            calculateDanTuoResult();
+        }
+
+        function clearDan() {
+            danSelected = [];
+            updateDanTuoDisplay();
+        }
+
+        function clearTuo() {
+            tuoSelected = [];
+            updateDanTuoDisplay();
+        }
+
+        function calculateDanTuoResult() {
+            const dan = danSelected.length;
+            const tuo = tuoSelected.length;
+            const result = document.getElementById('dantuoResult');
+            const cost = document.getElementById('dantuoCost');
+            result.innerHTML = '';
+            
+            if (dan === 0 || tuo === 0) {
+                cost.innerHTML = '';
+                result.innerHTML = '<tr><td colspan="3" style="color: #ff6b35;">请选择胆码和拖码</td></tr>';
+                return;
+            }
+
+            const totalNotes = combination(tuo, 10 - dan);
+            cost.innerHTML = `总注数：${totalNotes} 注，预计花费：${totalNotes * 2} 元`;
+
+            for (let i = 0; i <= dan; i++) {
+                const minMatch = i;
+                const remaining = 10 - i;
+                const possibleTuo = Math.min(remaining, tuo);
+                
+                if (possibleTuo > 0) {
+                    const prizeLevel = PRIZES.find(p => p.match === 10 - (dan - i));
+                    if (prizeLevel) {
+                        result.innerHTML += `
+                            <tr>
+                                <td>${prizeLevel.level}</td>
+                                <td>胆码中${i}个，拖码中${remaining}个</td>
+                                <td>${combination(dan, i) * combination(tuo, remaining)}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+        }
+
+        // 复试选号
+        let fushiSelected = [];
+
+        function initFushi() {
+            createNumberGrid('fushiGrid', toggleFushi);
+        }
+
+        function toggleFushi(num) {
+            const idx = fushiSelected.indexOf(num);
+            if (idx > -1) {
+                fushiSelected.splice(idx, 1);
+            } else {
+                fushiSelected.push(num);
+            }
+            updateFushiDisplay();
+        }
+
+        function updateFushiDisplay() {
+            createNumberGrid('fushiGrid', toggleFushi, fushiSelected);
+            updateSelectedDisplay(fushiSelected, 'fushiSelected', 'normal');
+            calculateFushiResult();
+        }
+
+        function generateFushiRandom() {
+            const count = Math.floor(Math.random() * 11) + 11;
+            fushiSelected = [];
+            while (fushiSelected.length < count) {
+                const num = Math.floor(Math.random() * 80) + 1;
+                if (!fushiSelected.includes(num)) {
+                    fushiSelected.push(num);
+                }
+            }
+            updateFushiDisplay();
+        }
+
+        function clearFushi() {
+            fushiSelected = [];
+            updateFushiDisplay();
+        }
+
+        function calculateFushiResult() {
+            const n = fushiSelected.length;
+            const result = document.getElementById('fushiResult');
+            const cost = document.getElementById('fushiCost');
+            result.innerHTML = '';
+            
+            if (n < 10) {
+                cost.innerHTML = '';
+                result.innerHTML = '<tr><td colspan="3" style="color: #ff6b35;">请选择至少10个号码</td></tr>';
+                return;
+            }
+
+            const totalNotes = combination(n, 10);
+            cost.innerHTML = `总注数：${totalNotes.toLocaleString()} 注，预计花费：${(totalNotes * 2).toLocaleString()} 元`;
+
+            PRIZES.forEach(prize => {
+                const k = prize.match;
+                if (k <= n) {
+                    const ways = combination(n, k) * combination(80 - n, 20 - k);
+                    const prob = (ways / combination(80, 20) * totalNotes).toFixed(2);
+                    result.innerHTML += `
+                        <tr>
+                            <td>${prize.level}</td>
+                            <td>命中${k}个号码</td>
+                            <td>约${parseFloat(prob) > 1 ? prob : '<1'}</td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        // 标签切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.panel).classList.add('active');
+            });
+        });
+
+        // ==================== 双色球螺旋选号 ====================
+        const SSQ_PRIZES = [
+            { level: '一等奖', redMatch: 6, blueMatch: 1, prize: '浮动 (最高1000万)', amount: 5000000 },
+            { level: '二等奖', redMatch: 6, blueMatch: 0, prize: '浮动 (约10-500万)', amount: 200000 },
+            { level: '三等奖', redMatch: 5, blueMatch: 1, prize: '3000元', amount: 3000 },
+            { level: '四等奖', redMatch: 5, blueMatch: 0, prize: '200元', amount: 200 },
+            { level: '四等奖', redMatch: 4, blueMatch: 1, prize: '200元', amount: 200 },
+            { level: '五等奖', redMatch: 4, blueMatch: 0, prize: '10元', amount: 10 },
+            { level: '五等奖', redMatch: 3, blueMatch: 1, prize: '10元', amount: 10 },
+            { level: '六等奖', redMatch: 2, blueMatch: 1, prize: '5元', amount: 5 },
+            { level: '六等奖', redMatch: 1, blueMatch: 1, prize: '5元', amount: 5 },
+            { level: '六等奖', redMatch: 0, blueMatch: 1, prize: '5元', amount: 5 }
+        ];
+
+        let ssqRedSelected = [];
+        let ssqBlueSelected = [];
+
+        // 生成螺旋坐标 (阿基米德螺旋)
+        function getSpiralPositions(count, cx, cy, startR, endR, startAngle = -Math.PI / 2) {
+            const positions = [];
+            const turns = 3.2; // 螺旋圈数
+            for (let i = 0; i < count; i++) {
+                const t = count === 1 ? 0 : i / (count - 1);
+                const r = startR + t * (endR - startR);
+                const angle = startAngle + t * turns * 2 * Math.PI;
+                positions.push({
+                    x: cx + r * Math.cos(angle),
+                    y: cy + r * Math.sin(angle)
+                });
+            }
+            return positions;
+        }
+
+        // 生成螺旋连接线的路径
+        function getSpiralPath(cx, cy, startR, endR, turns, count) {
+            let d = '';
+            const totalPoints = 500;
+            const startAngle = -Math.PI / 2;
+            for (let i = 0; i <= totalPoints; i++) {
+                const t = i / totalPoints;
+                const r = startR + t * (endR - startR);
+                const angle = startAngle + t * turns * 2 * Math.PI;
+                const x = cx + r * Math.cos(angle);
+                const y = cy + r * Math.sin(angle);
+                d += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2) + ' ';
+            }
+            return d;
+        }
+
+        // 绘制螺旋选号图
+        function drawSpiral(svgId, maxNum, colorTheme, selected, onClick, limit) {
+            const svg = document.getElementById(svgId);
+            svg.innerHTML = '';
+            const NS = 'http://www.w3.org/2000/svg';
+            const cx = 300, cy = 300;
+            const startR = 50, endR = 260;
+
+            // 绘制螺旋连接线
+            const path = document.createElementNS(NS, 'path');
+            path.setAttribute('d', getSpiralPath(cx, cy, startR, endR, 3.2, maxNum));
+            path.setAttribute('class', 'spiral-line');
+            svg.appendChild(path);
+
+            // 绘制中心点装饰
+            const centerCircle = document.createElementNS(NS, 'circle');
+            centerCircle.setAttribute('cx', cx);
+            centerCircle.setAttribute('cy', cy);
+            centerCircle.setAttribute('r', 20);
+            centerCircle.setAttribute('fill', colorTheme === 'red'
+                ? 'url(#redGradientSmall)'
+                : 'url(#blueGradientSmall)');
+            centerCircle.setAttribute('opacity', 0.15);
+            svg.appendChild(centerCircle);
+
+            // 定义渐变
+            const defs = document.createElementNS(NS, 'defs');
+            defs.innerHTML = `
+                <radialGradient id="redBall${svgId}" cx="35%" cy="30%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                    <stop offset="45%" stop-color="#ff5252"/>
+                    <stop offset="100%" stop-color="#cc0000"/>
+                </radialGradient>
+                <radialGradient id="redBallSel${svgId}" cx="35%" cy="30%">
+                    <stop offset="0%" stop-color="#fffde7" stop-opacity="0.95"/>
+                    <stop offset="45%" stop-color="#ffd54f"/>
+                    <stop offset="100%" stop-color="#ff6f00"/>
+                </radialGradient>
+                <radialGradient id="blueBall${svgId}" cx="35%" cy="30%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                    <stop offset="45%" stop-color="#4dabff"/>
+                    <stop offset="100%" stop-color="#0d47a1"/>
+                </radialGradient>
+                <radialGradient id="blueBallSel${svgId}" cx="35%" cy="30%">
+                    <stop offset="0%" stop-color="#fffde7" stop-opacity="0.95"/>
+                    <stop offset="45%" stop-color="#ffd54f"/>
+                    <stop offset="100%" stop-color="#ff6f00"/>
+                </radialGradient>
+                <filter id="glow${svgId}" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            `;
+            svg.appendChild(defs);
+
+            // 获取号码螺旋坐标
+            const positions = getSpiralPositions(maxNum, cx, cy, startR, endR);
+
+            // 每个号码半径
+            const ballR = maxNum <= 16 ? 30 : 24;
+            const textSize = maxNum <= 16 ? 15 : 13;
+
+            positions.forEach((pos, idx) => {
+                const num = idx + 1;
+                const isSelected = selected.includes(num);
+
+                const g = document.createElementNS(NS, 'g');
+                g.setAttribute('class', 'spiral-ball');
+                g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+
+                // 选中光圈
+                if (isSelected) {
+                    const glow = document.createElementNS(NS, 'circle');
+                    glow.setAttribute('r', ballR + 6);
+                    glow.setAttribute('fill', '#ffd700');
+                    glow.setAttribute('opacity', '0.35');
+                    glow.setAttribute('filter', `url(#glow${svgId})`);
+                    g.appendChild(glow);
+                }
+
+                const circle = document.createElementNS(NS, 'circle');
+                circle.setAttribute('r', ballR);
+                const baseGrad = colorTheme === 'red' ? `redBall${svgId}` : `blueBall${svgId}`;
+                const selGrad = colorTheme === 'red' ? `redBallSel${svgId}` : `blueBallSel${svgId}`;
+                circle.setAttribute('fill', `url(#${isSelected ? selGrad : baseGrad})`);
+                circle.setAttribute('stroke', isSelected ? '#ffd700' : 'rgba(255,255,255,0.35)');
+                circle.setAttribute('stroke-width', isSelected ? 3 : 1.2);
+                g.appendChild(circle);
+
+                const text = document.createElementNS(NS, 'text');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                text.setAttribute('y', 1);
+                text.setAttribute('font-size', textSize);
+                text.setAttribute('fill', '#ffffff');
+                text.setAttribute('stroke', 'rgba(0,0,0,0.25)');
+                text.setAttribute('stroke-width', '0.6');
+                text.textContent = String(num).padStart(2, '0');
+                g.appendChild(text);
+
+                g.addEventListener('click', () => onClick(num));
+                svg.appendChild(g);
+            });
+        }
+
+        // 点击红球
+        function toggleSsqRed(num) {
+            const i = ssqRedSelected.indexOf(num);
+            if (i > -1) {
+                ssqRedSelected.splice(i, 1);
+            } else {
+                ssqRedSelected.push(num);
+            }
+            updateSsqDisplay();
+        }
+
+        // 点击蓝球
+        function toggleSsqBlue(num) {
+            const i = ssqBlueSelected.indexOf(num);
+            if (i > -1) {
+                ssqBlueSelected.splice(i, 1);
+            } else {
+                ssqBlueSelected.push(num);
+            }
+            updateSsqDisplay();
+        }
+
+        // 更新显示
+        function updateSsqDisplay() {
+            ssqRedSelected.sort((a, b) => a - b);
+            ssqBlueSelected.sort((a, b) => a - b);
+
+            // 重绘螺旋图
+            drawSpiral('ssqRedSpiral', 33, 'red', ssqRedSelected, toggleSsqRed, 6);
+            drawSpiral('ssqBlueSpiral', 16, 'blue', ssqBlueSelected, toggleSsqBlue, 1);
+
+            // 计数
+            const redCount = document.getElementById('ssqRedCount');
+            const blueCount = document.getElementById('ssqBlueCount');
+            redCount.textContent = `已选 ${ssqRedSelected.length} / 6`;
+            redCount.className = 'count-tag' + (ssqRedSelected.length === 6 ? ' ok' : '');
+            blueCount.textContent = `已选 ${ssqBlueSelected.length} / 1`;
+            blueCount.className = 'count-tag' + (ssqBlueSelected.length >= 1 ? ' ok' : '');
+
+            // 号码展示
+            const redSel = document.getElementById('ssqRedSelected');
+            const blueSel = document.getElementById('ssqBlueSelected');
+            redSel.innerHTML = '';
+            blueSel.innerHTML = '';
+            ssqRedSelected.forEach(n => {
+                const el = document.createElement('div');
+                el.className = 'ssq-ball red';
+                el.textContent = String(n).padStart(2, '0');
+                redSel.appendChild(el);
+            });
+            ssqBlueSelected.forEach(n => {
+                const el = document.createElement('div');
+                el.className = 'ssq-ball blue';
+                el.textContent = String(n).padStart(2, '0');
+                blueSel.appendChild(el);
+            });
+
+            calculateSsqResult();
+        }
+
+        // 机选1注
+        function ssqRandomSelect() {
+            ssqRedSelected = [];
+            while (ssqRedSelected.length < 6) {
+                const n = Math.floor(Math.random() * 33) + 1;
+                if (!ssqRedSelected.includes(n)) ssqRedSelected.push(n);
+            }
+            ssqBlueSelected = [Math.floor(Math.random() * 16) + 1];
+            updateSsqDisplay();
+        }
+
+        // 机选复式
+        function ssqRandomFushi() {
+            const redN = 7 + Math.floor(Math.random() * 5); // 7-11个红球
+            const blueN = 2 + Math.floor(Math.random() * 4); // 2-5个蓝球
+            ssqRedSelected = [];
+            ssqBlueSelected = [];
+            while (ssqRedSelected.length < redN) {
+                const n = Math.floor(Math.random() * 33) + 1;
+                if (!ssqRedSelected.includes(n)) ssqRedSelected.push(n);
+            }
+            while (ssqBlueSelected.length < blueN) {
+                const n = Math.floor(Math.random() * 16) + 1;
+                if (!ssqBlueSelected.includes(n)) ssqBlueSelected.push(n);
+            }
+            updateSsqDisplay();
+        }
+
+        function ssqClear() {
+            ssqRedSelected = [];
+            ssqBlueSelected = [];
+            updateSsqDisplay();
+        }
+
+        // 计算投注分析
+        function calculateSsqResult() {
+            const r = ssqRedSelected.length;
+            const b = ssqBlueSelected.length;
+            const costEl = document.getElementById('ssqCost');
+            const resultEl = document.getElementById('ssqResult');
+            const fushiInfoEl = document.getElementById('ssqFushiInfo');
+
+            resultEl.innerHTML = '';
+
+            if (r < 6 || b < 1) {
+                costEl.innerHTML = '';
+                fushiInfoEl.style.display = 'none';
+                if (r === 0 && b === 0) {
+                    resultEl.innerHTML = '<tr><td colspan="4" style="color: #ff6b35;">请在螺旋图上点击号码进行选择</td></tr>';
+                } else {
+                    resultEl.innerHTML = `<tr><td colspan="4" style="color: #ff6b35;">还需选择红球 ${Math.max(0, 6 - r)} 个，蓝球 ${Math.max(0, 1 - b)} 个</td></tr>`;
+                }
+                return;
+            }
+
+            const redNotes = combination(r, 6);
+            const blueNotes = b;
+            const totalNotes = redNotes * blueNotes;
+            costEl.innerHTML = `共 ${totalNotes.toLocaleString()} 注，金额：${(totalNotes * 2).toLocaleString()} 元`;
+
+            // 复式提示
+            let fushiHtml = '';
+            if (r > 6 && b > 1) fushiHtml = `🔴 红球复式（${r}选6）+ 🔵 蓝球复式（${b}选1）＝ 全复式投注`;
+            else if (r > 6) fushiHtml = `🔴 红球复式（${r}选6）+ 🔵 蓝球单式`;
+            else if (b > 1) fushiHtml = `🔴 红球单式 + 🔵 蓝球复式（${b}选1）`;
+            else fushiHtml = '🔴🔵 标准单式投注';
+            const redCombos = combination(r, 6);
+            const blueCombos = b;
+            fushiHtml += `，红球组合 ${redCombos} 种 × 蓝球组合 ${blueCombos} 种 = ${totalNotes} 种组合。`;
+            fushiInfoEl.style.display = 'block';
+            fushiInfoEl.innerHTML = `<p>${fushiHtml}</p>`;
+
+            // 计算各种中奖情况
+            // 枚举命中红球 k 个 (0~6)，蓝球 m 个 (0或1)，计算对应注数
+            const resultMap = {};
+            for (let k = 0; k <= 6; k++) {
+                for (let m = 0; m <= 1; m++) {
+                    if (k > r || (m === 1 && b < 1)) continue;
+                    // 选对k个红球的组合数：C(r, k) * C(33 - r, 6 - k)
+                    // 蓝球：若m=1则选对了蓝球，需乘以 C(b, 1) * C(16 - b, 0) = b
+                    // 若m=0则蓝球没中，需乘以 (16 - b) ，但注数概念是：
+                    // 总注数中红球6个，蓝球1个。对m=1表示我们选的蓝球正好中，对m=0表示不中。
+                    // 故命中k红m蓝的注数 = 选中红球C(r,k)*C(33-r,6-k) 选中蓝球: m=1时C(b,1)，m=0时C(b,0)*C(16-b,1) 即 (16-b)
+                    // 但我们的"可能中出注数"应该反映：若开奖正好命中所选的 k 个红球 + m 个蓝球，会有几注中奖
+                    // 正确公式应为：C(r, k) * C(33 - r, 6 - k) ? 不对
+                    // 实际在复式投注中：若开奖有 W 个红球在我们选的r个中，X蓝是否在所选b中
+                    // 那么中奖注数 = C(W, 6?) 应该是 C(W, k) 组合？
+                    // 正确公式：开奖红球6个中有w个命中我方r个，则中奖注数 (红中w):
+                    //   C(w, 6) ? 不对，应该是：从w个命中球中选6个? 不，红球共选6个，要中k个，说明6个红球中正好k个属于w
+                    // 正确：中奖注数（红中k）：C(w, k) * C(r - w, 6 - k)。
+                    // 但我们展示"各种中奖情况可能中出注数"一般是按：选择了r红b蓝
+                    // 如果开奖结果：红球正好命中我方 k 个，蓝球命中我方 m 个（0或1）
+                    // => 这样的开奖有 C(r,k)*C(33-r,6-k) * [m=1 ? b : (16-b)] 种
+                    // 对用户更有用的是：假设中k个红+ m个蓝，他能中出几注（即中奖注数）
+                    //   = C(r, k) * C(r - k, 6 - k)? 不对，应该是：
+                    // 真正答案：我们选了 r 红，b 蓝，共 C(r,6)*b 注。
+                    // 如果开奖红球是 6 个，其中 w 个在我们的 r 个红球里；开奖蓝球若选中 = m（0或1）。
+                    // 那么我们中"w红+m蓝"等级的注数 = C(w, k?) ... 就是 C(w, 6)？ 不，我们每注是6红1蓝
+                    // 中奖条件：某注6个红球中恰好6、5、4、3、2、1、0个与开奖红球重合，同时蓝球是否中
+                    // 若w=w个红球是"我方已选的r个中命中开奖的w个"，则
+                    //   中奖注数（红中k，蓝中m） = C(w, k) * C(r - w, 6 - k) * [C(m命中蓝球选1个，如果蓝中)]
+                    // 但我们这里没法知道 w 具体等于几，所以常规做法是：
+                    // 列出所有奖级（6+1, 6+0, ...），对每个奖级，计算命中情况。例如：
+                    //   6+1等奖：红球中6蓝中1：红球从我方选的r个中正好有6个命中开奖 => C(r,6) * C(33-r, 0) = C(r,6)；蓝球从b个中中1 => C(b,1) = b
+                    //   该开奖场景下：中奖注数 = C(r, 6) * b
+                    //   其实：只要开奖正好选中我方所有6红 + 1蓝，就会有 C(r,6)*b 注中奖。
+                    // 也就是用户表格的意思就是"如果（开奖）恰好命中我方k红+蓝中/不中"，那么他能中的注数是多少。
+                    // 对于6红1蓝：C(r,6)*b（因为选的r个红球中任意6个的组合都能成6注，共C(r,6)种，蓝球中1的情况共b）
+                    // 对于5红1蓝：C(r,5)*C(33-r,1) * b 是开奖种数；但中奖注数 = C(5,5)*C(r-5,1) * b ? 不
+                    // 重新推导：假设开奖红球=R(6个)，开奖蓝球=B，且 R∩我方红球 的大小=k， B∈我方蓝球 则为m=1否则0。
+                    // 用户单注由6红1蓝组成，此注中 k 红 m 蓝 要求该6红球里恰好k个是在R∩我方红球中，且6红球的其余(6-k)个在我方红球∩R补集中。
+                    // 总中奖注数 = C(k, k) * C(r - k, 6 - k) * [m=1 ? b : 0 ? 不对，蓝球每注1个，若开奖蓝球在我方b个蓝球中，则所有以该蓝球为蓝球的注都算蓝中]
+                    // 正确结论：中奖注数（给定开奖条件：我方有k个红球命中开奖红球，我方有m个蓝球命中开奖蓝球）：
+                    //   令 k = 我方红球中命中开奖的数量；m ∈ {0,1} = 蓝球是否中奖
+                    //   则中奖注数（满足"红中k蓝中m"条件的注在用户所有注里的数量）=
+                    //     C(k, 6 中命中几个)？ 让我们想想：
+                    // 对于"红中w个且蓝中m个"中奖等级条件（w是6,5,4,3,2,1,0；m是1或0）：
+                    //   中奖注数 = C(红球选中集合与开奖红球的交集大小, w) * C(红球选中共 r 个但没命中开奖的数量, 6 - w) * [若蓝中m=1则为C(命中蓝球,1) = 1；蓝未中0=0？不对]
+                    // 关键区分：W = "开奖红球集合" ∩ "我方选出的r个红球"，其大小固定设为w。
+                    // 那么在用户C(r,6)*b注中，有多少注满足"该注6红球中恰好有k个属于W"（即开奖中k个红球）？
+                    // = C(w, k) * C(r - w, 6 - k) * [若蓝中：从b个蓝球中选1个=如果开奖蓝球是我方蓝球中的一个则有1注命中，所以蓝中贡献是1（中奖注都使用那个开奖蓝球），蓝未中贡献是0（如果开奖蓝球非我方选择，所有b注蓝球都没中）]
+                    // 但我们无法知道 w=|W|，因为w可以等于 0..min(r,6)。这需要枚举。
+                    // 简化方案（行业通用做法）：对于复式选了r红b蓝，展示每个奖级（如"四等奖：红5+蓝0 或 红4+蓝1"）对应的"如果开奖结果正好完全在我方选池内的中奖注数"：
+                    //   一等奖（6+1）：C(r,6) * b 注
+                    //   二等奖（6+0）：C(r,6) * (16 - b) -- 但这不是"可能中得注数"对用户的意义
+                    // 用户更关心：假设运气好，我选的里面正好开出来6+1，我能拿多少注的奖 → C(r,6)*b 注一等奖
+                    // 同理，中得5+1三等奖：C(r,5)*C(r-5,1)*b? 不，那是C(r,5)选红球中5个，再选1个红球与开奖无关 = C(r,5)*C(33 - r, 1)? 不是，这里用户问的是中奖注数，故开奖红球必须包括那5个，再加上1个非我方红球
+                    // 但我们展示的是"对于选定的r红b蓝，各奖级对应的中奖注数（若开奖正好满足条件）"：
+                    //   一等奖(6+1): C(r,6) * b = 任意选我方6红球 × 任意1个我方蓝球（如果这个蓝球正好是开奖蓝球那就中）-- 但只考虑"条件满足时"，我们假设开奖蓝球在我方选择中，所以：
+                    //   中奖注数 = C(r,6) * b ... 但这似乎不对：蓝球只能中1个，故应该是 C(r,6) * 1？不！
+                    // 终于想通：复式投注中，用户选了b个蓝球，则所有注覆盖了所有b个蓝球各一次。
+                    // 如果开奖蓝球是这b个中的一个，则：在用户所有注中，所有包含该开奖蓝球的注（共C(r,6)注）都算蓝中。
+                    // 因此：开奖蓝球在我方b个中时，"蓝中1"的条件注数 = C(r,6) 注。
+                    // 开奖蓝球不在我方中时，蓝中条件下中奖注数 = 0。
+                    // 所以：
+                    //   一等奖（6+1）中奖注数 = C(r, 6) * [如果开奖蓝球在我方选的b个中]，其中6红球全中：必须开奖红球6个全是我方r个中选的6个，也就是C(r,6)种可能组合对应不同开奖红球集合，但给定开奖红球就是6个具体号码，如果这6个全属于我方选择，则有1个组合C(r,6)匹配成功 → 中奖注数 = 1（只算这个红球组合） × [蓝中1? 1:0]
+                    // 等等，我混淆了"开奖种数"和"中奖注数"。
+                    // 明确目标：对于固定的r红和b蓝选择，用户投注后，假设开奖是任意一套"6+1"号码。如果开奖恰好中得"我方k红 + 蓝中或不中"，则用户的C(r,6)*b注中，有多少注中得对应奖级。
+                    // 定义：w = |开奖红球 ∩ 我方r红|，即实际命中红球数；bm = 开奖蓝球是否在我方b蓝中 (0或1)。
+                    // 对固定 w, bm：
+                    //   用户的一注（6红 + 1蓝）中得该奖级，当且仅当：该注的6个红球中，恰好有 k=w 个来自"开奖红球∩我方r红"（即 w个全部被选入），且其余 6-w 个来自我方r红但不在开奖红球中的 r-w 个；且蓝球中情况等于bm。
+                    // 注意中奖条件里"命中w个红球"指的是：单注6红有w个与开奖红球重合 → 这w个只能是 w个 (开奖∩我方) 里的，全部都必须选上，加上(6-w)个不是开奖红球的我方红球。
+                    // 因此，中奖注数 = C(w, w) * C(r - w, 6 - w) * [蓝球中m的注数]
+                    // 蓝球中如果 bm=1（开奖蓝球在我方b中），则有 C(r,6) 注使用该蓝球，这些注中蓝中都成立；而要求蓝中成立的注数就是：蓝球选"开奖蓝球"这一个，且红球组合任意 => C(r,6) 注。但进一步结合红球要"中w个"，红球组合数是 C(w, w)*C(r-w, 6-w) = C(r-w, 6-w)。
+                    // 所以总中奖注数 = C(r - w, 6 - w) * [bm=1 ? 1 : 0]
+                    // 但 w 本身取值 0~min(r,6) 可以为0~6。
+                    // 这样表格应该对 w=6,5,4,3,2,1,0 以及 bm=0/1 组合情况列出相应奖级。
+                    // 比如 w=6 & bm=1 → 一等奖 C(r-6, 0)*1 = 1注？
+                    // 不对，因为C(r-6,0)=1，意思是用户C(r,6)*b注里只有1注的6红球正好全中，且蓝球中1。
+                    // 但用户选了r个红球，开奖红球有6个。如果这6个正好全在我方r个里，那么我方的C(r,6)注红球组合中，有且仅有1组完全等于开奖红球，所以中一等奖红球部分的注数确实是1。蓝球部分：若开奖蓝球是我方b个中的一个，则蓝球中1的注有C(r,6)注（使用那个蓝球的所有组合），但是红球全中限定为1组，故一等奖注数 = 1组红球 × 1个蓝球 = 1注。如果 b=2 且开奖蓝球是我方两个蓝球之一，则一等奖仍是1注。
+                    // 验证：r=7, b=2 → C(7,6)*2=14注。若开奖红球6个全是我方7个中的（存在这种开奖的概率是C(7,6)/C(33,6)），且开奖蓝球在我方2个中，则：
+                    //   一等奖：红球=开奖6红（只有1组），蓝球=开奖蓝（只有1个）→ 1注。正确。
+                    //   二等奖：6红+蓝0：红球=开奖6红（1组），蓝球=另一个没中的蓝球 → 1注二等奖。正确。
+                    //   三等奖：5红+蓝1：6红球中5个命中开奖红球，另1个没中。开奖红球6个全在我方，我方共7个（7-6=1个非开奖红球）。选5个中+1个不中即C(6,5)*C(1,1)=6注红球组合；蓝球用中1个的那个 → 6注。
+                    //   用公式C(r-w,6-w) = C(7-5, 6-5) = C(2,1) = 2。不对，应该是6！
+                    // 啊，我的公式错了。重新推导：
+                    // w = 开奖红球数∩我方红球 = 5（不是6！）。
+                    // 但我前面例子是 w=6，所以中三等奖（5红+蓝1）的场景不存在，因为w=6，红中必然是6（或更少？不，红球6个全中，不可能只中5）。
+                    // 重新举例：r=10（选10个红球），b=2；开奖结果：其中5个红球属于我方10红球，1个红球不在我方；蓝球是我方b中的一个。
+                    // → w=5, bm=1。
+                    // 求中三等奖（5红+蓝1）的注数：
+                    //   红球组合必须从 5个开奖红球 选5个；从 10-5=5个我方但未开奖红球 选1个 → C(5,5)*C(5,1)=5注
+                    //   蓝球必须是开奖蓝球那个 → 1
+                    // → 共5注三等奖。
+                    // 按公式 C(r-w, 6-w) 错误（因为要从"中奖红球池"中选 5个）。
+                    // 正确公式应该是 C(w, 中奖要求红球数) * C(r - w, 6 - 中奖要求红球数)
+                    // 例如三等奖条件是红中5+蓝1，中奖要求红球数=5。
+                    // 所以注数 = C(w, 5) * C(r - w, 6 - 5) * [bm=1?1:0]
+                    // 举例验证：w=5, r=10, bm=1 → C(5,5)*C(5,1) = 1*5 = 5 ✓
+                    // 前例r=7,w=6,bm=1：中三等奖（要求5红）：C(6,5)*C(7-6,1) = 6*1=6 ✓ 与我之前手动算一致！
+                    // 一等奖（红6+蓝1）：C(w,6)*C(r-w,0) ，当w=6 → C(6,6)*C(r-6,0) = 1*1=1 ✓
+                    // 太棒了！公式正确。
+                    // 但 w 是变量，它取决于开奖结果。为展示"可能中得各奖级的注数"，我们应该按"假设开奖红球中有 w 个命中我方选择、蓝球中与否"分情况展示。
+                    // 可我们无法枚举所有 w，因为不知道开奖到底命中几个。
+                    // 行业中常见的展示方式：不依赖 w 具体值，而是直接展示"如果开奖正好命中我方所有选择（全中）情况下"各奖级注数。即 w=6 且 bm=1 展开所有中奖层级。其实w=6 时红中只能是6（因为开奖红球6个全中），那其他奖级呢？比如红5+蓝1不可能在w=6下出现（除非选蓝球≠开奖蓝球）。要展示所有奖级，需要考虑 w=6 下不同蓝球中/不中（覆盖一、二、四、六等奖？），以及 w=5, w=4, w=3, w=2, w=1, w=0 的各种情况？
+                    // 常规简化方案：对于每个奖级条件（例如"5+0"四等奖），直接计算：在用户当前r红b蓝中，若开奖满足"5+0"（我方红球有5个中、蓝球没中），则能中几注。这就对 w、bm 作假设对应条件。
+                    // 实现：对每个奖级 {redMatch, blueMatch}，令 w=redMatch, bm=blueMatch
+                    //   计算中奖注数 = C(r, w) * C(33 - r, 6 - w) * [开奖红球和我方交集正好w个的组合，不是我们要的]
+                    //   不，我们要的是假设开奖结果"红中w 蓝中m"，那么用户能中的注数 = C(w, w) * C(r - w, 6 - w) * [蓝球中对应的注数？]
+                    //   等一下！之前的公式：中奖注数 = C(w, k) * C(r - w, 6 - k) * [蓝球部分]，其中 k 是奖级要求的红球命中数。
+                    //   但当我要展示"奖级条件 5+0 能中几注"时，我是说：开奖红球有 k=5 个在我方选池、蓝球不中，则中奖注数 = C(5,5)*C(r-5, 1) * [蓝未中情况下，蓝球用非开奖蓝球的组合数]
+                    //   具体：如果奖级条件是 blueMatch = 1，那么蓝球必须是开奖蓝球（在我方b个蓝球中的那个），贡献1个蓝球选项。
+                    //   如果 blueMatch = 0，蓝球不能是开奖蓝球，而开奖蓝球若在我方b个蓝球之外，则我方所有b注蓝球都不中，所以对于蓝未中条件，每个C(r,6)红的注 × b 个蓝都是"蓝未中"，但我们要的是红球中 k 个 + 蓝未中。
+                    //   但开奖蓝球可能是我方b个蓝球之一（此时 bm=1），也可能不是（bm=0）。
+                    //   我们展示表格的每一行是一个"奖级（条件）"，例如"5+0=四等奖"。对于该条件：
+                    //     w = k（红命中数就是奖级红球要求），bm = blueMatch。
+                    //     中奖注数 = C(w, k) * C(r - w, 6 - k) * [蓝球部分]
+                    //     这里 k=w，C(w,k)=1，简化为 C(r - w, 6 - w) * [蓝球部分]
+                    //     蓝球部分：blueMatch = 1 时，开奖蓝球必须是我方b个蓝球之一，并且这注的蓝球必须等于开奖蓝球 → 1种选择
+                    //     蓝球部分：blueMatch = 0 时，开奖蓝球不在我方b蓝球中（因为bm=0），那么我方所有b个蓝球都不等于开奖蓝球，所以任何一注使用b个蓝球都满足"蓝未中" → 共b种选择。
+                    //     但请等一下：这个前提是"开奖蓝球不在我方蓝球中"，但我们在"展示中奖条件"时，blueMatch=0 就已经假设了开奖蓝球不中（不在我方选池中），这时我方所有b个蓝球都没中，因此所有b个蓝球都可以搭配。
+                    //   验证：r=7, b=2
+                    //     一等奖（6+1）：C(7-6, 0)*1 = 1*1=1注 ✓
+                    //     二等奖（6+0）：C(7-6, 0)*b = 1*2=2注 → 对吗？开奖6红球全中，开奖蓝球不在我方2蓝中。我方2注蓝球都没中，而红球全中组合有1个，所以1×2=2注二等奖。✓
+                    //     三等奖（5+1）：假设w=5（开奖红球5个在我方），C(7-5, 6-5)=C(2,1)=2注红球；蓝中 → 2*1=2注三等奖。对吗？开奖红5个在我方7个中(另1个不在)，蓝在我方。那红中5个：选5个中奖的 + 1个不中奖的(从7-5=2个我方非中奖红选) = C(2,1)=2。蓝球用开奖蓝球，所以共2注。✓
+                    //     四等奖（5+0）：C(7-5,6-5) * b = C(2,1)*2 = 4注。开奖红5中、蓝不中 → 我方2蓝都不中，故×2 ✓
+                    //   公式完全正确！
+                    //   但还有个问题：不同奖级条件下的 w 不能同时成立，因为 w 是同一个开奖。但用户表格只是展示"各种中奖情况"（即每一种开奖可能性对应的中奖注数），分别列出即可。
+
+                    SSQ_PRIZES.forEach(pz => {
+                        const k = pz.redMatch;
+                        const m = pz.blueMatch;
+                        if (k > r) return; // 不可能
+                        if (k < 0) k = 0;
+                        let notes;
+                        if (r - k < 6 - k) notes = 0;
+                        else {
+                            const redPart = combination(r - k, 6 - k); // C(r-k, 6-k) 因为C(w,k)=1 w=k
+                            const bluePart = (m === 1) ? 1 : b; // blueMatch=1时用开奖蓝球=1种；=0时可用全部b个
+                            notes = redPart * bluePart;
+                        }
+                        if (notes === 0) return;
+                        // 合并重复奖级（如四等奖有5+0和4+1两种）
+                        const key = pz.level + '_' + pz.redMatch + '_' + pz.blueMatch;
+                        // 直接输出
+                        resultEl.innerHTML += `
+                            <tr>
+                                <td><b>${pz.level}</b></td>
+                                <td>中 ${pz.redMatch} 红 + ${pz.blueMatch} 蓝</td>
+                                <td>${pz.prize}</td>
+                                <td>${notes.toLocaleString()} 注</td>
+                            </tr>
+                        `;
+                    });
+        }
+
+        function initSsq() {
+            drawSpiral('ssqRedSpiral', 33, 'red', ssqRedSelected, toggleSsqRed, 6);
+            drawSpiral('ssqBlueSpiral', 16, 'blue', ssqBlueSelected, toggleSsqBlue, 1);
+            calculateSsqResult();
+        }
+
+        // 初始化
+        initRandom();
+        initDanTuo();
+        initFushi();
+        initSsq();
+    </script>
+</body>
+</html>
