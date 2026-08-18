@@ -9,7 +9,7 @@ import java.util.Map;
 public interface Kl8Service {
     Kl8Draw getLatestDraw();
     Kl8Draw getByIssue(String issue);
-    PageResult<Kl8Draw> listDraws(int pageNum, int pageSize, String keyword, LocalDate startDate, LocalDate endDate);
+    PageResult<Kl8Draw> listDraws(int pageNum, int pageSize, String issue, String numbers, LocalDate startDate, LocalDate endDate);
     int saveDraw(Kl8Draw draw);
     int batchInsertDraws(List<Kl8Draw> draws);
     long countDraws();

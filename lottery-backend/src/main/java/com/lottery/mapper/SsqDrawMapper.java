@@ -21,13 +21,17 @@ public interface SsqDrawMapper {
 
     SsqDraw selectByIssue(@Param("issue") String issue);
 
-    List<SsqDraw> selectList(@Param("keyword") String keyword,
+    List<SsqDraw> selectList(@Param("issue") String issue,
+                             @Param("redList") List<String> redList,
+                             @Param("blue") String blue,
                              @Param("startDate") LocalDate startDate,
                              @Param("endDate") LocalDate endDate,
                              @Param("offset") Integer offset,
                              @Param("limit") Integer limit);
 
-    long selectCount(@Param("keyword") String keyword,
+    long selectCount(@Param("issue") String issue,
+                     @Param("redList") List<String> redList,
+                     @Param("blue") String blue,
                      @Param("startDate") LocalDate startDate,
                      @Param("endDate") LocalDate endDate);
 

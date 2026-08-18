@@ -94,15 +94,25 @@
         SELECT <include refid="Base_Column_List"/> FROM kl8_draw WHERE issue = #{issue} LIMIT 1
     </select>
 
+    <!-- 号码匹配片段：给定一个号码 #{n}，匹配 20 列中的任一个 -->
+    <sql id="numberMatch">
+        (n_1 = #{n} OR n_2 = #{n} OR n_3 = #{n} OR n_4 = #{n} OR n_5 = #{n}
+         OR n_6 = #{n} OR n_7 = #{n} OR n_8 = #{n} OR n_9 = #{n} OR n_10 = #{n}
+         OR n_11 = #{n} OR n_12 = #{n} OR n_13 = #{n} OR n_14 = #{n} OR n_15 = #{n}
+         OR n_16 = #{n} OR n_17 = #{n} OR n_18 = #{n} OR n_19 = #{n} OR n_20 = #{n})
+    </sql>
+
     <select id="selectList" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM kl8_draw
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (issue LIKE CONCAT('%', #{keyword}, '%')
-                     OR CONCAT(n_1,',',n_2,',',n_3,',',n_4,',',n_5,',',n_6,',',n_7,',',n_8,',',n_9,',',n_10,
-                               ',',n_11,',',n_12,',',n_13,',',n_14,',',n_15,',',n_16,',',n_17,',',n_18,',',n_19,',',n_20)
-                         LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="issue != null and issue != ''">
+                AND issue LIKE CONCAT('%', #{issue}, '%')
+            </if>
+            <if test="numberList != null and numberList.size() > 0">
+                <foreach collection="numberList" item="n">
+                    AND <include refid="numberMatch"/>
+                </foreach>
             </if>
             <if test="startDate != null">AND draw_date <![CDATA[ >= ]]> #{startDate}</if>
             <if test="endDate != null">AND draw_date <![CDATA[ <= ]]> #{endDate}</if>
@@ -116,11 +126,13 @@
     <select id="selectCount" resultType="long">
         SELECT COUNT(1) FROM kl8_draw
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (issue LIKE CONCAT('%', #{keyword}, '%')
-                     OR CONCAT(n_1,',',n_2,',',n_3,',',n_4,',',n_5,',',n_6,',',n_7,',',n_8,',',n_9,',',n_10,
-                               ',',n_11,',',n_12,',',n_13,',',n_14,',',n_15,',',n_16,',',n_17,',',n_18,',',n_19,',',n_20)
-                         LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="issue != null and issue != ''">
+                AND issue LIKE CONCAT('%', #{issue}, '%')
+            </if>
+            <if test="numberList != null and numberList.size() > 0">
+                <foreach collection="numberList" item="n">
+                    AND <include refid="numberMatch"/>
+                </foreach>
             </if>
             <if test="startDate != null">AND draw_date <![CDATA[ >= ]]> #{startDate}</if>
             <if test="endDate != null">AND draw_date <![CDATA[ <= ]]> #{endDate}</if>

@@ -21,13 +21,15 @@ public interface Kl8DrawMapper {
 
     Kl8Draw selectByIssue(@Param("issue") String issue);
 
-    List<Kl8Draw> selectList(@Param("keyword") String keyword,
+    List<Kl8Draw> selectList(@Param("issue") String issue,
+                             @Param("numberList") List<String> numberList,
                              @Param("startDate") LocalDate startDate,
                              @Param("endDate") LocalDate endDate,
                              @Param("offset") Integer offset,
                              @Param("limit") Integer limit);
 
-    long selectCount(@Param("keyword") String keyword,
+    long selectCount(@Param("issue") String issue,
+                     @Param("numberList") List<String> numberList,
                      @Param("startDate") LocalDate startDate,
                      @Param("endDate") LocalDate endDate);
 

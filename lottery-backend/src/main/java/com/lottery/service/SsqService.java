@@ -15,7 +15,7 @@ public interface SsqService {
     // ========== 开奖历史 ==========
     SsqDraw getLatestDraw();
     SsqDraw getByIssue(String issue);
-    PageResult<SsqDraw> listDraws(int pageNum, int pageSize, String keyword, LocalDate startDate, LocalDate endDate);
+    PageResult<SsqDraw> listDraws(int pageNum, int pageSize, String issue, String red, String blue, LocalDate startDate, LocalDate endDate);
     int saveDraw(SsqDraw draw);
     int batchInsertDraws(List<SsqDraw> draws);
     long countDraws();

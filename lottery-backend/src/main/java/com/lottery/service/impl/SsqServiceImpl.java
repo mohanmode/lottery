@@ -31,11 +31,37 @@ public class SsqServiceImpl implements SsqService {
     public SsqDraw getByIssue(String issue) { return drawMapper.selectByIssue(issue); }
 
     @Override
-    public PageResult<SsqDraw> listDraws(int pageNum, int pageSize, String keyword, LocalDate startDate, LocalDate endDate) {
+    public PageResult<SsqDraw> listDraws(int pageNum, int pageSize, String issue, String red, String blue, LocalDate startDate, LocalDate endDate) {
+        // 红球支持多个：逗号/空格分隔，如 "06,14,21" -> ["06","14","21"]，并归一化补零
+        List<String> redList = parseRedCodes(red);
+        String normBlue = normalizeCode(blue, 16);
         int offset = Math.max(0, (pageNum - 1) * pageSize);
-        long total = drawMapper.selectCount(keyword, startDate, endDate);
-        List<SsqDraw> list = drawMapper.selectList(keyword, startDate, endDate, offset, pageSize);
+        long total = drawMapper.selectCount(issue, redList, normBlue, startDate, endDate);
+        List<SsqDraw> list = drawMapper.selectList(issue, redList, normBlue, startDate, endDate, offset, pageSize);
         return PageResult.of(total, pageNum, pageSize, list);
+    }
+
+    /** 解析红球输入：支持 "06,14,21" / "06 14 21" / "6, 14"，返回归一化后的去重列表 */
+    private List<String> parseRedCodes(String input) {
+        if (input == null || input.trim().isEmpty()) return Collections.emptyList();
+        String[] parts = input.trim().split("[,，\\s]+");
+        List<String> result = new ArrayList<>();
+        for (String p : parts) {
+            if (p.isEmpty()) continue;
+            String norm = normalizeCode(p, 33);
+            if (norm != null && !result.contains(norm)) result.add(norm);
+        }
+        return result;
+    }
+
+    /** 号码归一化：纯数字 1-2 位补零到 2 位；非数字或超范围返回原值（不会命中） */
+    private String normalizeCode(String input, int max) {
+        if (input == null || input.isEmpty()) return null;
+        String s = input.trim();
+        if (!s.matches("\\d{1,2}")) return s; // 非数字保留原值（不会匹配）
+        int n = Integer.parseInt(s);
+        if (n < 1 || n > max) return s;
+        return String.format("%02d", n);
     }
 
     @Override
@@ -63,7 +89,7 @@ public class SsqServiceImpl implements SsqService {
     }
 
     @Override
-    public long countDraws() { return drawMapper.selectCount(null, null, null); }
+    public long countDraws() { return drawMapper.selectCount(null, null, null, null, null); }
 
     // ===================== 选号生成 =====================
     private static final String[] RED_POOL;
@@ -227,7 +253,7 @@ public class SsqServiceImpl implements SsqService {
     public int[] analyzeNumberFrequency(int recentDrawCount, boolean isRed) {
         int total = isRed ? 34 : 17;
         int[] freq = new int[total];
-        PageResult<SsqDraw> page = listDraws(1, Math.max(1, Math.min(5000, recentDrawCount)), null, null, null);
+        PageResult<SsqDraw> page = listDraws(1, Math.max(1, Math.min(5000, recentDrawCount)), null, null, null, null, null);
         for (SsqDraw d : page.getList()) {
             if (isRed) {
                 freq[Integer.parseInt(d.getRed1())]++;
@@ -247,7 +273,7 @@ public class SsqServiceImpl implements SsqService {
     @Override
     public Map<String, Object> getStatistics(int recentDrawCount) {
         int limit = Math.max(1, Math.min(5000, recentDrawCount));
-        PageResult<SsqDraw> page = listDraws(1, limit, null, null, null);
+        PageResult<SsqDraw> page = listDraws(1, limit, null, null, null, null, null);
         List<SsqDraw> draws = page.getList();
         // 倒序 → 正序 (老→新)，方便遗漏值计算
         Collections.reverse(draws);

@@ -38,10 +38,12 @@ public class SsqController {
     public ApiResult<PageResult<SsqDrawVO>> listDraws(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "20") int pageSize,
-            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String issue,
+            @RequestParam(required = false) String red,
+            @RequestParam(required = false) String blue,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        PageResult<SsqDraw> page = ssqService.listDraws(pageNum, pageSize, keyword, startDate, endDate);
+        PageResult<SsqDraw> page = ssqService.listDraws(pageNum, pageSize, issue, red, blue, startDate, endDate);
         List<SsqDrawVO> voList = page.getList().stream().map(this::toVO).collect(Collectors.toList());
         return ApiResult.ok(PageResult.of(page.getTotal(), pageNum, pageSize, voList));
     }

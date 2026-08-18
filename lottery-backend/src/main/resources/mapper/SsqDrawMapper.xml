@@ -66,10 +66,17 @@
         SELECT <include refid="Base_Column_List"/>
         FROM ssq_draw
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (issue LIKE CONCAT('%', #{keyword}, '%')
-                     OR CONCAT(red_1,',',red_2,',',red_3,',',red_4,',',red_5,',',red_6) LIKE CONCAT('%', #{keyword}, '%')
-                     OR blue = #{keyword})
+            <if test="issue != null and issue != ''">
+                AND issue LIKE CONCAT('%', #{issue}, '%')
+            </if>
+            <if test="redList != null and redList.size() > 0">
+                <foreach collection="redList" item="r">
+                    AND (red_1 = #{r} OR red_2 = #{r} OR red_3 = #{r}
+                         OR red_4 = #{r} OR red_5 = #{r} OR red_6 = #{r})
+                </foreach>
+            </if>
+            <if test="blue != null and blue != ''">
+                AND blue = #{blue}
             </if>
             <if test="startDate != null">AND draw_date <![CDATA[ >= ]]> #{startDate}</if>
             <if test="endDate != null">AND draw_date <![CDATA[ <= ]]> #{endDate}</if>
@@ -83,10 +90,17 @@
     <select id="selectCount" resultType="long">
         SELECT COUNT(1) FROM ssq_draw
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (issue LIKE CONCAT('%', #{keyword}, '%')
-                     OR CONCAT(red_1,',',red_2,',',red_3,',',red_4,',',red_5,',',red_6) LIKE CONCAT('%', #{keyword}, '%')
-                     OR blue = #{keyword})
+            <if test="issue != null and issue != ''">
+                AND issue LIKE CONCAT('%', #{issue}, '%')
+            </if>
+            <if test="redList != null and redList.size() > 0">
+                <foreach collection="redList" item="r">
+                    AND (red_1 = #{r} OR red_2 = #{r} OR red_3 = #{r}
+                         OR red_4 = #{r} OR red_5 = #{r} OR red_6 = #{r})
+                </foreach>
+            </if>
+            <if test="blue != null and blue != ''">
+                AND blue = #{blue}
             </if>
             <if test="startDate != null">AND draw_date <![CDATA[ >= ]]> #{startDate}</if>
             <if test="endDate != null">AND draw_date <![CDATA[ <= ]]> #{endDate}</if>

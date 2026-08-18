@@ -37,10 +37,11 @@ public class Kl8Controller {
     public ApiResult<PageResult<Kl8DrawVO>> listDraws(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "20") int pageSize,
-            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String issue,
+            @RequestParam(required = false) String numbers,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        PageResult<Kl8Draw> page = kl8Service.listDraws(pageNum, pageSize, keyword, startDate, endDate);
+        PageResult<Kl8Draw> page = kl8Service.listDraws(pageNum, pageSize, issue, numbers, startDate, endDate);
         List<Kl8DrawVO> voList = page.getList().stream().map(this::toVO).collect(Collectors.toList());
         return ApiResult.ok(PageResult.of(page.getTotal(), pageNum, pageSize, voList));
     }

@@ -25,11 +25,36 @@ public class Kl8ServiceImpl implements Kl8Service {
     public Kl8Draw getByIssue(String issue) { return drawMapper.selectByIssue(issue); }
 
     @Override
-    public PageResult<Kl8Draw> listDraws(int pageNum, int pageSize, String keyword, LocalDate startDate, LocalDate endDate) {
+    public PageResult<Kl8Draw> listDraws(int pageNum, int pageSize, String issue, String numbers, LocalDate startDate, LocalDate endDate) {
+        // 号码支持多个：逗号/空格分隔，如 "12,68" -> ["12","68"]，并归一化补零
+        List<String> numberList = parseNumbers(numbers, 80);
         int offset = Math.max(0, (pageNum - 1) * pageSize);
-        long total = drawMapper.selectCount(keyword, startDate, endDate);
-        List<Kl8Draw> list = drawMapper.selectList(keyword, startDate, endDate, offset, pageSize);
+        long total = drawMapper.selectCount(issue, numberList, startDate, endDate);
+        List<Kl8Draw> list = drawMapper.selectList(issue, numberList, startDate, endDate, offset, pageSize);
         return PageResult.of(total, pageNum, pageSize, list);
+    }
+
+    /** 解析号码输入：支持 "12,68" / "12 68" / "6,68"，返回归一化后的去重列表 */
+    private List<String> parseNumbers(String input, int max) {
+        if (input == null || input.trim().isEmpty()) return Collections.emptyList();
+        String[] parts = input.trim().split("[,，\\s]+");
+        List<String> result = new ArrayList<>();
+        for (String p : parts) {
+            if (p.isEmpty()) continue;
+            String norm = normalizeCode(p, max);
+            if (norm != null && !result.contains(norm)) result.add(norm);
+        }
+        return result;
+    }
+
+    /** 号码归一化：纯数字 1-2 位补零到 2 位；非数字或超范围返回原值（不会命中） */
+    private String normalizeCode(String input, int max) {
+        if (input == null || input.isEmpty()) return null;
+        String s = input.trim();
+        if (!s.matches("\\d{1,2}")) return s;
+        int n = Integer.parseInt(s);
+        if (n < 1 || n > max) return s;
+        return String.format("%02d", n);
     }
 
     @Override
@@ -57,12 +82,12 @@ public class Kl8ServiceImpl implements Kl8Service {
     }
 
     @Override
-    public long countDraws() { return drawMapper.selectCount(null, null, null); }
+    public long countDraws() { return drawMapper.selectCount(null, null, null, null); }
 
     @Override
     public int[] analyzeNumberFrequency(int recentDrawCount) {
         int[] freq = new int[81]; // 1-80
-        PageResult<Kl8Draw> page = listDraws(1, Math.max(1, Math.min(5000, recentDrawCount)), null, null, null);
+        PageResult<Kl8Draw> page = listDraws(1, Math.max(1, Math.min(5000, recentDrawCount)), null, null, null, null);
         for (Kl8Draw d : page.getList()) {
             for (int n : d.getNumberIntList()) freq[n]++;
         }
@@ -73,7 +98,7 @@ public class Kl8ServiceImpl implements Kl8Service {
     @Override
     public Map<String, Object> getStatistics(int recentDrawCount) {
         int limit = Math.max(1, Math.min(5000, recentDrawCount));
-        PageResult<Kl8Draw> page = listDraws(1, limit, null, null, null);
+        PageResult<Kl8Draw> page = listDraws(1, limit, null, null, null, null);
         List<Kl8Draw> draws = page.getList();
         // 倒序 → 正序 (老→新)，方便遗漏值计算
         Collections.reverse(draws);
