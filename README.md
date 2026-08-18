@@ -171,8 +171,6 @@ npm run dev
 MIT
 
 <p align="center">
-| 微信 | 支付宝 |
-|:----:|:------:|
-| <img src=".github/assets/wx.jpg" width="200"/> | <img src=".github/assets/alipay.jpg" width="200"/> |
+ <img src=".github/assets/wx.jpg" width="200"/> | <img src=".github/assets/alipay.jpg" width="200"/> 
 </p>
 
