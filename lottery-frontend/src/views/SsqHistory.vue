@@ -4,7 +4,11 @@
       <div class="panel-head">
         <h2>双色球开奖历史（共 {{ total }} 期，10年数据）</h2>
         <div class="filters">
-          <el-input v-model="filters.keyword" placeholder="期号 / 红球 / 蓝球" clearable style="width:200px"
+          <el-input v-model="filters.issue" placeholder="期号" clearable style="width:150px"
+                    @keyup.enter="loadPage(1)" :prefix-icon="Search"/>
+          <el-input v-model="filters.red" placeholder="红球 (多个用逗号分隔)" clearable style="width:220px"
+                    @keyup.enter="loadPage(1)" :prefix-icon="Search"/>
+          <el-input v-model="filters.blue" placeholder="蓝球 (1-16)" clearable style="width:140px"
                     @keyup.enter="loadPage(1)" :prefix-icon="Search"/>
           <el-date-picker v-model="filters.range" type="daterange" range-separator="至"
                           start-placeholder="开始日期" end-placeholder="结束日期" style="width:300px"
@@ -106,7 +110,7 @@ const router = useRouter()
 const list = ref([])
 const total = ref(0)
 const loading = ref(false)
-const filters = reactive({ pageNum: 1, pageSize: 20, keyword: '', range: [] })
+const filters = reactive({ pageNum: 1, pageSize: 20, issue: '', red: '', blue: '', range: [] })
 
 async function loadPage(p) {
   if (p) filters.pageNum = p
@@ -114,7 +118,9 @@ async function loadPage(p) {
   try {
     const data = await ssq.list({
       pageNum: filters.pageNum, pageSize: filters.pageSize,
-      keyword: filters.keyword || undefined,
+      issue: filters.issue || undefined,
+      red:   filters.red   || undefined,
+      blue:  filters.blue  || undefined,
       startDate: filters.range?.[0] || undefined,
       endDate:   filters.range?.[1] || undefined
     })
@@ -122,7 +128,7 @@ async function loadPage(p) {
   } finally { loading.value = false }
 }
 function resetFilters() {
-  filters.keyword = ''; filters.range = []; loadPage(1)
+  filters.issue = ''; filters.red = ''; filters.blue = ''; filters.range = []; loadPage(1)
 }
 const pad = (n) => String(n).padStart(2, '0')
 

@@ -19,6 +19,7 @@
         <el-menu-item index="/ssq-match">中奖查询/分析</el-menu-item>
         <el-menu-item index="/ssq-statistics">双色球统计分析</el-menu-item>
         <el-menu-item index="/kl8">快乐8选号</el-menu-item>
+        <el-menu-item index="/kl8-history">快乐8开奖历史</el-menu-item>
         <el-menu-item index="/kl8-statistics">快乐8统计分析</el-menu-item>
         <el-menu-item index="/my-bets">我的投注</el-menu-item>
       </el-menu>

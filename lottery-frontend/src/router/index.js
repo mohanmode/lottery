@@ -7,6 +7,7 @@ const routes = [
   { path: '/ssq-match',  component: () => import('@/views/SsqMatch.vue'),     meta: { title: '中奖查询/分析' } },
   { path: '/ssq-statistics', component: () => import('@/views/SsqStatistics.vue'), meta: { title: '双色球统计分析' } },
   { path: '/kl8',        component: () => import('@/views/Kl8Pick.vue'),      meta: { title: '快乐8选号' } },
+  { path: '/kl8-history', component: () => import('@/views/Kl8History.vue'), meta: { title: '快乐8开奖历史' } },
   { path: '/kl8-statistics', component: () => import('@/views/Kl8Statistics.vue'), meta: { title: '快乐8统计分析' } },
   { path: '/my-bets',    component: () => import('@/views/MyBets.vue'),       meta: { title: '我的投注记录' } }
 ]
