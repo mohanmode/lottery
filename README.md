@@ -169,3 +169,6 @@ npm run dev
 ## License
 
 MIT
+
+![微信](.github/assets/wx.jpg)
+![支付宝](.github/assets/alipay.png)
